@@ -330,10 +330,8 @@ that symbols accessible in the current namespace go first."
 
 (defn source-location-for-frame [frame]
   (let [line     (.getLineNumber frame)
-        filename (if (.. frame getFileName (endsWith ".java"))
-		   (.. frame getClassName (replace \. \/)
-		       (substring 0 (.lastIndexOf (.getClassName frame) ".")) 
-		       (concat (str File/separator (.getFileName frame))))
+	filename (if (.. frame getFileName (endsWith ".java"))
+		   (.. frame getClassName  (replace \. \/) (concat ".java"))
 		   (str (namespace-to-path 
 			 (symbol ((re-find #"(.*?)\$" 
 					   (.getClassName frame)) 1))) 
