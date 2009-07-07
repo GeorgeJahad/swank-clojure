@@ -330,8 +330,12 @@ that symbols accessible in the current namespace go first."
 
 (defn source-location-for-frame [frame]
   (let [line     (.getLineNumber frame)
-        frame-ns ((re-find #"(.*?)\$" (.getClassName frame)) 1)
-        filename (str (namespace-to-path (symbol frame-ns)) File/separator (.getFileName frame))
+	filename (if (.. frame getFileName (endsWith ".java"))
+		   (.. frame getClassName  (replace \. \/) (concat ".java"))
+		   (str (namespace-to-path 
+			 (symbol ((re-find #"(.*?)\$" 
+					   (.getClassName frame)) 1))) 
+			File/separator (.getFileName frame)))
         path     (slime-find-file-in-paths filename (slime-search-paths))]
     `(:location ~path (:line ~line) nil)))
 
@@ -373,7 +377,7 @@ that symbols accessible in the current namespace go first."
 (defslimefn frame-catch-tags-for-emacs [n] nil)
 (defslimefn frame-locals-for-emacs [n] nil)
 
-(defslimefn frame-source-location-for-emacs [n]
+(defslimefn frame-source-location [n]
   (source-location-for-frame
      (nth (.getStackTrace *current-exception*) n)))
 
